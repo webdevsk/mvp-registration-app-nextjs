@@ -4,13 +4,15 @@ import { useState } from "react"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { PersonalInfoStep } from "@/components/steps/personal-info-step"
 import { AddressDetailsStep } from "@/components/steps/address-details-step"
 import { AccountSetupStep } from "@/components/steps/account-setup-step"
+import { ConfirmationStep } from "@/components/steps/confirmation-step"
 import { FormStepper } from "@/components/form-stepper"
+import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react"
 
 // Define the form schema for all steps
 export const formSchema = z
@@ -44,10 +46,12 @@ const steps = [
   { id: 1, name: "Personal Information" },
   { id: 2, name: "Address Details" },
   { id: 3, name: "Account Setup" },
+  { id: 4, name: "Confirmation" },
 ]
 
 export function MultiStepForm() {
   const [currentStep, setCurrentStep] = useState(1)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -67,8 +71,8 @@ export function MultiStepForm() {
 
   const onSubmit = (data: FormValues) => {
     console.log("Form submitted:", data)
+    setIsSubmitted(true)
     // Here you would typically send the data to your backend
-    alert("Form submitted successfully!")
   }
 
   const handleNext = async () => {
@@ -84,6 +88,10 @@ export function MultiStepForm() {
       case 3:
         fieldsToValidate = ["username", "password", "confirmPassword"]
         break
+      case 4:
+        // No validation needed for confirmation step
+        form.handleSubmit(onSubmit)()
+        return
     }
 
     const isStepValid = await form.trigger(fieldsToValidate)
@@ -91,8 +99,6 @@ export function MultiStepForm() {
     if (isStepValid) {
       if (currentStep < steps.length) {
         setCurrentStep(currentStep + 1)
-      } else {
-        form.handleSubmit(onSubmit)()
       }
     }
   }
@@ -103,8 +109,35 @@ export function MultiStepForm() {
     }
   }
 
+  if (isSubmitted) {
+    return (
+      <Card className="mx-auto max-w-md">
+        <CardContent className="pt-6">
+          <div className="flex flex-col items-center justify-center space-y-4 py-6 text-center">
+            <div className="bg-primary/10 flex h-16 w-16 items-center justify-center rounded-full">
+              <CheckCircle className="text-primary h-8 w-8" />
+            </div>
+            <h2 className="text-2xl font-bold">Registration Complete!</h2>
+            <p className="text-muted-foreground">
+              Thank you for registering. Your account has been created successfully.
+            </p>
+            <Button
+              className="mt-4"
+              onClick={() => {
+                setIsSubmitted(false)
+                setCurrentStep(1)
+                form.reset()
+              }}>
+              Start Over
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <FormStepper steps={steps} currentStep={currentStep} />
 
       <Card>
@@ -114,16 +147,30 @@ export function MultiStepForm() {
               {currentStep === 1 && <PersonalInfoStep control={form.control} />}
               {currentStep === 2 && <AddressDetailsStep control={form.control} />}
               {currentStep === 3 && <AccountSetupStep control={form.control} />}
+              {currentStep === 4 && <ConfirmationStep form={form} />}
 
-              <div className="mt-8 flex justify-between">
-                <Button type="button" variant="outline" onClick={handlePrevious} disabled={currentStep === 1}>
-                  Previous
-                </Button>
+              <CardFooter className="px-0 pt-4">
+                <div className="flex w-full justify-between">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handlePrevious}
+                    disabled={currentStep === 1}
+                    className={currentStep === 1 ? "pointer-events-none opacity-0" : ""}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Previous
+                  </Button>
 
-                <Button type="button" onClick={handleNext}>
-                  {currentStep === steps.length ? "Submit" : "Next"}
-                </Button>
-              </div>
+                  <Button type="button" onClick={handleNext}>
+                    {currentStep === steps.length ? "Submit" : "Next"}
+                    {currentStep !== steps.length ? (
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    ) : (
+                      <CheckCircle className="ml-2 h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </CardFooter>
             </form>
           </Form>
         </CardContent>

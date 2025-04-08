@@ -12,7 +12,10 @@ interface AccountSetupStepProps {
 export function AccountSetupStep({ control }: AccountSetupStepProps) {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Account Setup</h2>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">Account Setup</h2>
+        <p className="text-muted-foreground text-sm">Create your account credentials.</p>
+      </div>
 
       <FormField
         control={control}

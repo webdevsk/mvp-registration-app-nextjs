@@ -12,7 +12,10 @@ interface PersonalInfoStepProps {
 export function PersonalInfoStep({ control }: PersonalInfoStepProps) {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Personal Information</h2>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">Personal Information</h2>
+        <p className="text-muted-foreground text-sm">Please provide your personal details.</p>
+      </div>
 
       <FormField
         control={control}
