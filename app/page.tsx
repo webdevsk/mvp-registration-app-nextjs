@@ -1,7 +1,12 @@
+import { MultiStepForm } from "@/components/multi-step-form"
+
 export default function Home() {
   return (
-    <>
-      <h1 className="text-center text-3xl font-bold text-red-400">Hello world</h1>
-    </>
+    <main className="container mx-auto px-4 py-10 md:px-6">
+      <div className="mx-auto max-w-3xl">
+        <h1 className="mb-8 text-center text-3xl font-bold">Registration Form</h1>
+        <MultiStepForm />
+      </div>
+    </main>
   )
 }
