@@ -22,10 +22,10 @@ export function FormStepper({ steps, currentStep }: FormStepperProps) {
       {/* Step indicators */}
       <div className="flex w-full items-center">
         {steps.map((step) => (
-          <div key={step.id} className="flex flex-1 flex-col items-center ring-1">
+          <div key={step.id} className="flex flex-1 flex-col items-center">
             <div
               className={cn(
-                "z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-200",
+                "z-10 flex size-10 items-center justify-center rounded-full border-2 transition-all duration-200",
                 currentStep > step.id
                   ? "bg-primary border-primary text-primary-foreground"
                   : currentStep === step.id
@@ -62,26 +62,9 @@ export function FormStepper({ steps, currentStep }: FormStepperProps) {
         <div
           className="bg-primary absolute top-0 left-0 h-full rounded-full transition-all duration-300 ease-in-out"
           style={{
-            width: `${progressPercentage}%`,
+            width: `calc(${progressPercentage}% - (40px/2))`, // Adjust for the size of the step indicators
           }}
         />
-      </div>
-
-      {/* Connector lines between steps */}
-      <div className="absolute top-5 right-0 left-0 z-0 flex -translate-y-1/2 justify-between">
-        {steps.map((step, index) => {
-          // Don't render a connector after the last step
-          if (index === steps.length - 1) return null
-
-          const isCompleted = currentStep > step.id
-
-          return (
-            <div
-              key={`connector-${step.id}`}
-              className={cn("mx-1 h-0.5 flex-1", isCompleted ? "bg-primary" : "bg-muted-foreground/20")}
-            />
-          )
-        })}
       </div>
     </div>
   )
