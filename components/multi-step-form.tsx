@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -119,6 +119,30 @@ export function MultiStepForm() {
     }
   }
 
+  useEffect(() => {
+    const ctrl = new AbortController()
+    window.addEventListener(
+      "keydown",
+      (e) => {
+        if (currentStep === steps.length ? isPending : false) return
+        if (e.key === "Enter") {
+          e.preventDefault()
+          handleNext()
+        }
+      },
+      { signal: ctrl.signal }
+    )
+    return () => {
+      ctrl.abort()
+    }
+  })
+  // Focus first input on slide change
+  const htmlFormRef = useRef<HTMLFormElement | null>(null)
+  useEffect(() => {
+    if (!htmlFormRef) return
+    htmlFormRef.current?.querySelector("input")?.focus()
+  }, [htmlFormRef, currentStep])
+
   if (isSubmitted) {
     return (
       <Card className="mx-auto max-w-md">
@@ -152,7 +176,7 @@ export function MultiStepForm() {
       <Card>
         <CardContent className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form ref={htmlFormRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {currentStep === 1 && <PersonalInfoStep control={form.control} />}
               {currentStep === 2 && <AddressDetailsStep control={form.control} />}
               {currentStep === 3 && <AccountSetupStep control={form.control} />}
