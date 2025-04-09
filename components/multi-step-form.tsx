@@ -119,7 +119,9 @@ export function MultiStepForm() {
     }
   }
 
+  const htmlFormRef = useRef<HTMLFormElement | null>(null)
   useEffect(() => {
+    if (!htmlFormRef.current) return
     const ctrl = new AbortController()
     window.addEventListener(
       "keydown",
@@ -137,9 +139,8 @@ export function MultiStepForm() {
     }
   })
   // Focus first input on slide change
-  const htmlFormRef = useRef<HTMLFormElement | null>(null)
   useEffect(() => {
-    if (!htmlFormRef) return
+    if (!htmlFormRef.current) return
     htmlFormRef.current?.querySelector("input")?.focus()
   }, [htmlFormRef, currentStep])
 
