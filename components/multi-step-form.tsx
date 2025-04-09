@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -13,34 +12,8 @@ import { AccountSetupStep } from "@/components/steps/account-setup-step"
 import { ConfirmationStep } from "@/components/steps/confirmation-step"
 import { FormStepper } from "@/components/form-stepper"
 import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react"
-
-// Define the form schema for all steps
-export const formSchema = z
-  .object({
-    // Step 1: Personal Information
-    fullName: z.string().min(1, "Full name is required"),
-    email: z.string().min(1, "Email is required").email("Invalid email format"),
-    phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
-
-    // Step 2: Address Details
-    streetAddress: z.string().min(1, "Street address is required"),
-    city: z.string().min(1, "City is required"),
-    zipCode: z
-      .string()
-      .min(5, "Zip code must be at least 5 digits")
-      .regex(/^\d+$/, "Zip code must contain only numbers"),
-
-    // Step 3: Account Setup
-    username: z.string().min(4, "Username must be at least 4 characters"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  })
-
-export type FormValues = z.infer<typeof formSchema>
+import { useLocalStorage } from "usehooks-ts"
+import { FormValues, formSchema } from "@/lib/form-schema"
 
 const steps = [
   { id: 1, name: "Personal Information" },
@@ -49,30 +22,46 @@ const steps = [
   { id: 4, name: "Confirmation" },
 ]
 
+const defaultFormValues = {
+  fullName: "",
+  email: "",
+  phoneNumber: "",
+  streetAddress: "",
+  city: "",
+  zipCode: "",
+  username: "",
+  password: "",
+  confirmPassword: "",
+}
+
 export function MultiStepForm() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
+  const [initialFormValues, setFormValues, removeFormValues] = useLocalStorage<Partial<FormValues>>(
+    "formValues",
+    defaultFormValues
+  )
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      phoneNumber: "",
-      streetAddress: "",
-      city: "",
-      zipCode: "",
-      username: "",
-      password: "",
-      confirmPassword: "",
-    },
+    defaultValues: initialFormValues,
     mode: "onChange",
+  })
+
+  // Saving values to local storage
+  form.watch((values) => {
+    // Skip saving password values
+    setFormValues({ ...values, password: "", confirmPassword: "" })
   })
 
   const onSubmit = (data: FormValues) => {
     console.log("Form submitted:", data)
     setIsSubmitted(true)
     // Here you would typically send the data to your backend
+    // After success
+    removeFormValues()
+    form.reset(defaultFormValues)
   }
 
   const handleNext = async () => {
@@ -126,7 +115,6 @@ export function MultiStepForm() {
               onClick={() => {
                 setIsSubmitted(false)
                 setCurrentStep(1)
-                form.reset()
               }}>
               Start Over
             </Button>

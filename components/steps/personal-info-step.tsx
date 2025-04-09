@@ -1,7 +1,7 @@
 "use client"
 
 import type { Control } from "react-hook-form"
-import type { FormValues } from "@/components/multi-step-form"
+import type { FormValues } from "../../lib/form-schema"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 

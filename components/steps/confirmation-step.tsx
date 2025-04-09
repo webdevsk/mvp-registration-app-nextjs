@@ -1,7 +1,7 @@
 "use client"
 
 import type { UseFormReturn } from "react-hook-form"
-import type { FormValues } from "@/components/multi-step-form"
+import type { FormValues } from "../../lib/form-schema"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
