@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "next-themes"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { QueryProvider } from "@/lib/query-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,14 +22,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <div className="flex min-h-screen flex-col">
-            <header className="border-b">
-              <div className="container mx-auto flex justify-end px-4 py-4 md:px-6">
-                <ThemeToggle />
-              </div>
-            </header>
-            <main className="flex-1">{children}</main>
-          </div>
+          <QueryProvider>
+            <div className="flex min-h-screen flex-col">
+              <header className="border-b">
+                <div className="container mx-auto flex justify-end px-4 py-4 md:px-6">
+                  <ThemeToggle />
+                </div>
+              </header>
+              <main className="flex-1">{children}</main>
+            </div>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

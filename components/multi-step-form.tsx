@@ -14,6 +14,7 @@ import { FormStepper } from "@/components/form-stepper"
 import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react"
 import { useLocalStorage } from "usehooks-ts"
 import { FormValues, formSchema } from "@/lib/form-schema"
+import { useMutation } from "@tanstack/react-query"
 
 const steps = [
   { id: 1, name: "Personal Information" },
@@ -55,13 +56,33 @@ export function MultiStepForm() {
     setFormValues({ ...values, password: "", confirmPassword: "" })
   })
 
+  const submitFormData = async (data: FormValues): Promise<unknown> => {
+    const response = await fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    })
+    if (!response.ok) {
+      throw new Error("Submission failed")
+    }
+    return response.json()
+  }
+
+  const { mutate, isError, isPending } = useMutation({
+    mutationFn: submitFormData,
+    onSuccess: (data: unknown) => {
+      console.log("Form submitted successfully:", data)
+      setIsSubmitted(true)
+      removeFormValues()
+      form.reset(defaultFormValues)
+    },
+    onError: (error: Error) => {
+      console.error("Error submitting form data:", error)
+    },
+  })
+
   const onSubmit = (data: FormValues) => {
-    console.log("Form submitted:", data)
-    setIsSubmitted(true)
-    // Here you would typically send the data to your backend
-    // After success
-    removeFormValues()
-    form.reset(defaultFormValues)
+    mutate(data)
   }
 
   const handleNext = async () => {
@@ -149,18 +170,19 @@ export function MultiStepForm() {
                     Previous
                   </Button>
 
-                  <Button type="button" onClick={handleNext}>
-                    {currentStep === steps.length ? "Submit" : "Next"}
-                    {currentStep !== steps.length ? (
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    ) : (
-                      <CheckCircle className="ml-2 h-4 w-4" />
-                    )}
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={currentStep === steps.length ? isPending : false}>
+                    {currentStep === steps.length ? (isPending ? "Submitting..." : "Submit") : "Next"}
+                    {currentStep !== steps.length && <ArrowRight className="ml-2 h-4 w-4" />}
+                    {currentStep === steps.length && !isPending && <CheckCircle className="ml-2 h-4 w-4" />}
                   </Button>
                 </div>
               </CardFooter>
             </form>
           </Form>
+          {isError && <div className="mt-2 text-sm text-red-600">Error submitting form data. Please try again.</div>}
         </CardContent>
       </Card>
     </div>
